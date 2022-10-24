@@ -1,0 +1,114 @@
+postgres=# CREATE DATABASE testdb;
+CREATE DATABASE
+postgres=# \l
+                                  List of databases
+   Name    |  Owner   | Encoding |   Collate   |    Ctype    |   Access privileges
+-----------+----------+----------+-------------+-------------+-----------------------
+ postgres  | postgres | UTF8     | en_US.UTF-8 | en_US.UTF-8 |
+ template0 | postgres | UTF8     | en_US.UTF-8 | en_US.UTF-8 | =c/postgres          +
+           |          |          |             |             | postgres=CTc/postgres
+ template1 | postgres | UTF8     | en_US.UTF-8 | en_US.UTF-8 | =c/postgres          +
+           |          |          |             |             | postgres=CTc/postgres
+ testdb    | postgres | UTF8     | en_US.UTF-8 | en_US.UTF-8 |
+(4 rows)
+
+postgres=# \c testdb;
+You are now connected to database "testdb" as user "postgres".
+testdb=# GRANT ALL ON DATABASE testdb TO new_role;
+GRANT
+testdb=# \l
+                                  List of databases
+   Name    |  Owner   | Encoding |   Collate   |    Ctype    |   Access privileges
+-----------+----------+----------+-------------+-------------+-----------------------
+ postgres  | postgres | UTF8     | en_US.UTF-8 | en_US.UTF-8 |
+ template0 | postgres | UTF8     | en_US.UTF-8 | en_US.UTF-8 | =c/postgres          +
+           |          |          |             |             | postgres=CTc/postgres
+ template1 | postgres | UTF8     | en_US.UTF-8 | en_US.UTF-8 | =c/postgres          +
+           |          |          |             |             | postgres=CTc/postgres
+ testdb    | postgres | UTF8     | en_US.UTF-8 | en_US.UTF-8 | =Tc/postgres         +
+           |          |          |             |             | postgres=CTc/postgres+
+           |          |          |             |             | new_role=CTc/postgres
+(4 rows)
+
+testdb=# CREATE TABLE computers
+testdb-# (
+testdb(# id SERIAL,
+testdb(# login VARCHAR(10),
+testdb(# comp_name VARCHAR(20),
+testdb(# ip INET
+testdb(# );
+CREATE TABLE
+testdb=# INSERT INTO computers VALUES (‘1’, ‘user1’, ‘comp1’, ‘10.10.50.50’);
+ERROR:  syntax error at or near ".10"
+LINE 1: ... INTO computers VALUES (‘1’, ‘user1’, ‘comp1’, ‘10.10.50.50’...
+                                                             ^
+testdb=# INSERT INTO computers VALUES (‘1’, ‘user1’, ‘comp1’, "10.10.50.50");
+ERROR:  column "‘1’" does not exist
+LINE 1: INSERT INTO computers VALUES (‘1’, ‘user1’, ‘comp1’, "10.10....
+                                      ^
+HINT:  Perhaps you meant to reference the column "computers.id" or the column "computers.ip".
+testdb=# INSERT INTO computers VALUES (‘1’, ‘user1’, ‘comp1’, '10.10.50.50');
+ERROR:  column "‘1’" does not exist
+LINE 1: INSERT INTO computers VALUES (‘1’, ‘user1’, ‘comp1’, '10.10....
+                                      ^
+HINT:  Perhaps you meant to reference the column "computers.id" or the column "computers.ip".
+testdb=# INSERT INTO computers VALUES (‘1’, ‘user1’, ‘comp1’, `10.10.50.50`);
+ERROR:  syntax error at or near ".50"
+LINE 1: ...NTO computers VALUES (‘1’, ‘user1’, ‘comp1’, `10.10.50.50`);
+                                                              ^
+testdb=# INSERT INTO computers VALUES (‘1’, ‘user1’, ‘comp1’, ‘10.10.50.50’);
+ERROR:  syntax error at or near ".10"
+LINE 1: ... INTO computers VALUES (‘1’, ‘user1’, ‘comp1’, ‘10.10.50.50’...
+                                                             ^
+testdb=# INSERT INTO computers VALUES (‘1’, ‘user1’, ‘comp1’, ‘10.10.50.50’);
+ERROR:  syntax error at or near ".10"
+LINE 1: ... INTO computers VALUES (‘1’, ‘user1’, ‘comp1’, ‘10.10.50.50’...
+                                                             ^
+testdb=# INSERT INTO computers VALUES (‘1’, ‘user1’, ‘comp1’, ‘10_10_50_50’);
+ERROR:  column "‘1’" does not exist
+LINE 1: INSERT INTO computers VALUES (‘1’, ‘user1’, ‘comp1’, ‘10_10_...
+                                      ^
+HINT:  Perhaps you meant to reference the column "computers.id" or the column "computers.ip".
+testdb=# SELECT * FROM computers;
+ id | login | comp_name | ip
+----+-------+-----------+----
+(0 rows)
+
+testdb=# \l
+                                  List of databases
+   Name    |  Owner   | Encoding |   Collate   |    Ctype    |   Access privileges
+-----------+----------+----------+-------------+-------------+-----------------------
+ postgres  | postgres | UTF8     | en_US.UTF-8 | en_US.UTF-8 |
+ template0 | postgres | UTF8     | en_US.UTF-8 | en_US.UTF-8 | =c/postgres          +
+           |          |          |             |             | postgres=CTc/postgres
+ template1 | postgres | UTF8     | en_US.UTF-8 | en_US.UTF-8 | =c/postgres          +
+           |          |          |             |             | postgres=CTc/postgres
+ testdb    | postgres | UTF8     | en_US.UTF-8 | en_US.UTF-8 | =Tc/postgres         +
+           |          |          |             |             | postgres=CTc/postgres+
+           |          |          |             |             | new_role=CTc/postgres
+(4 rows)
+
+testdb=# \c testdb;
+You are now connected to database "testdb" as user "postgres".
+testdb=# SELECT * FROM computers;
+ id | login | comp_name | ip
+----+-------+-----------+----
+(0 rows)
+
+testdb=# INSERT INTO computers VALUES (1, ‘user1’, ‘comp1’, 10_10_50_50);
+ERROR:  syntax error at or near "_10_50_50"
+LINE 1: ...ERT INTO computers VALUES (1, ‘user1’, ‘comp1’, 10_10_50_50)...
+                                                             ^
+testdb=# INSERT INTO computers VALUES (1, ‘user1’, ‘comp1’, 10.10.50.50);
+ERROR:  syntax error at or near ".50"
+LINE 1: ...RT INTO computers VALUES (1, ‘user1’, ‘comp1’, 10.10.50.50);
+                                                               ^
+testdb=# INSERT INTO computers VALUES (1, "user1", "comp1", 10.10.50.50);
+ERROR:  syntax error at or near ".50"
+LINE 1: ...RT INTO computers VALUES (1, "user1", "comp1", 10.10.50.50);
+                                                               ^
+testdb=# INSERT INTO computers VALUES (1, 'user1', 'comp1', 10.10.50.50);
+ERROR:  syntax error at or near ".50"
+LINE 1: ...RT INTO computers VALUES (1, 'user1', 'comp1', 10.10.50.50);
+                                                               ^
+testdb=#
