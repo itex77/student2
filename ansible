@@ -50,67 +50,60 @@ ansible -i hosts servers -m ping
 # tasks file for deploy_zabbix-agent_on_hosts
 - block: # ========Block for RedHat======
   - name: Install zabbix-agent on RedHat Family
-    yum:
+    ansible.builtin.yum:
             name: zabbix-agent
             state: latest
 
   - name: Stop service zabbix-agent
-    become: yes
-    service:
+    ansible.builtin.service:
             name: zabbix-agent
             state: stopped
 
   - name: Remove zabbix config file
-    become: yes
-    file:
-            path: /etc/zabbix/zabbix_agentd.conf
+    ansible.builtin.file:
+            path: /etc/zabbix_agentd.conf
             state: absent
 
-            #  - name: Create new zabbix config file from template
-            #become: yes
-            #templates:
-            #src: "templates/zabbix_agentd.conf.j2"
-            #dest: "/etc/zabbix/zabbix_agentd.conf"
+  - name: Create new zabbix config file from templates
+    ansible.builtin.template:
+            src: zabbix_agentd.conf.j2
+            dest: /etc/zabbix_agentd.conf
 
   - name: Start service zabbix-agent
-    become: yes
-    service:
+    ansible.builtin.service:
             name: zabbix-agent
             state: started
             enabled: yes
+
   when: ansible_os_family == "RedHat"
 
 - block: #=======Block for Debian======
   - name: Install zabbix-agent on Debian Family
-    apt:
-           name: zabbix-agent
-           state: latest
-  
+    ansible.builtin.apt:
+            name: zabbix-agent
+            state: present
+
   - name: Stop service zabbix-agent
-    become: yes
-    service:
+    ansible.builtin.service:
             name: zabbix-agent
             state: stopped
 
   - name: Remove zabbix config file
-    become: yes
-    file:
+    ansible.builtin.file:
             path: /etc/zabbix/zabbix_agentd.conf
             state: absent
-  
-            #  - name: Create new zabbix config file from templates
-            #become: yes
-            #templates:
-            #src: "templates/zabbix_agentd.conf.j2"
-            #dest: "/etc/zabbix/zabbix_agentd.conf"
-            #mode: 0555
+
+  - name: Create new zabbix config file from templates
+    ansible.builtin.template:
+            src: zabbix_agentd.conf.j2
+            dest: /etc/zabbix/zabbix_agentd.conf
 
   - name: Start service zabbix-agent
-    become: yes
-    service:
+    ansible.builtin.service:
             name: zabbix-agent
             state: started
             enabled: yes
+
   when: ansible_os_family == "Debian"
   
 #templates: zabbix-agentd.conf.j2
