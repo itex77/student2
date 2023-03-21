@@ -1,16 +1,18 @@
 sudo apt update
 sudo apt install ansible
-sudo vim /etc/ansible/hosts
+sudo vim /etc/ansible/hosts - #список серверов и групп серверов для развёртывания клиента zabbix
   
-sudo vim ansible.cfg
-  "[defaults]
+sudo vim ansible.cfg - #отключение проверки ключей при подключении по SSH
+[defaults]
 host_key_checking = false
-inventory         = /etc/ansible/hosts"
+inventory         = /etc/ansible/hosts
 
 ansible --version
 sudo ssh-copy-id -i /home/itex/.ssh/id_rsa.pub itex@10.129.0.35
 sudo ssh-copy-id -i /home/itex/.ssh/id_rsa.pub itex@10.129.0.5
 ansible -i hosts servers -m ping
+sudo ansible-galaxy init deploy_zabbix-agent_on_hosts
+
 # configure roles.
 ├── ansible.cfg
 ├── hosts
